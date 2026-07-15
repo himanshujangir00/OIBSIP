@@ -1,0 +1,112 @@
+mport java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
+public class NumGuessGame {
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Random random = new Random();
+    private static final List<String> roundHistory = new ArrayList<>();
+    private static int roundCount = 1;
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Number Guessing Game!");
+        boolean playAgain = true;
+
+        while (playAgain) {
+            playRound();
+            playAgain = askToPlayAgain();
+        }
+
+        displayGameSummary();
+        System.out.println("Thanks for playing!");
+    }
+
+    private static void playRound() {
+        System.out.println("\n--- ROUND " + roundCount + " ---");
+        
+        // Difficulty Level Selection
+        System.out.println("Select Difficulty:");
+        System.out.println("1. Easy (1-50, 10 attempts)");
+        System.out.println("2. Medium (1-100, 7 attempts)");
+        System.out.println("3. Hard (1-200, 5 attempts)");
+        int choice = getValidIntegerInput("Enter choice (1-3): ", 1, 3);
+
+        int maxRange = 100;
+        int maxAttempts = 7;
+
+        switch (choice) {
+            case 1 -> { maxRange = 50; maxAttempts = 10; }
+            case 2 -> { maxRange = 100; maxAttempts = 7; }
+            case 3 -> { maxRange = 200; maxAttempts = 5; }
+        }
+
+        int targetNumber = random.nextInt(maxRange) + 1;
+        int attemptsUsed = 0;
+        boolean hasWon = false;
+
+        System.out.println("\nI have chosen a number between 1 and " + maxRange + ". Start guessing!");
+
+        while (attemptsUsed < maxAttempts) {
+            attemptsUsed++;
+            System.out.printf("[Attempt %d/%d] ", attemptsUsed, maxAttempts);
+            int guess = getValidIntegerInput("Enter your guess: ", 1, maxRange);
+
+            if (guess == targetNumber) {
+                System.out.println("Correct!");
+                hasWon = true;
+                break;
+            } else if (guess > targetNumber) {
+                System.out.println("Too High!");
+            } else {
+                System.out.println("Too Low!");
+            }
+        }
+
+        if (hasWon) {
+            roundHistory.add("Round " + roundCount + " — guessed in " + attemptsUsed + " attempts.");
+        } else {
+            System.out.println("\nYou Lost! The number was: " + targetNumber);
+            roundHistory.add("Round " + roundCount + " — Failed to guess (Target: " + targetNumber + ").");
+        }
+
+        roundCount++;
+    }
+
+    private static boolean askToPlayAgain() {
+        while (true) {
+            System.out.print("\nDo you want to play another round? (yes/no): ");
+            String input = scanner.next().trim().toLowerCase();
+            if (input.equals("yes") || input.equals("y")) return true;
+            if (input.equals("no") || input.equals("n")) return false;
+            System.out.println("Invalid input. Please type 'yes' or 'no'.");
+        }
+    }
+
+    private static void displayGameSummary() {
+        System.out.println("\n=== FINAL GAME SUMMARY ===");
+        if (roundHistory.isEmpty()) {
+            System.out.println("No rounds played.");
+        } else {
+            for (String summary : roundHistory) {
+                System.out.println(summary);
+            }
+        }
+    }
+
+    private static int getValidIntegerInput(String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                int value = scanner.nextInt();
+                if (value >= min && value <= max) {
+                    return value;
+                }
+                System.out.printf("Please enter a number between %d and %d.%n", min, max);
+            } else {
+                System.out.println("Invalid input. Please enter a valid number.");
+                scanner.next(); // Clear invalid token
+            }
+        }
+    }
+}
